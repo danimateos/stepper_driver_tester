@@ -29,8 +29,13 @@ RotaryEncoder encoder(PIN_CLK, PIN_DT, RotaryEncoder::LatchMode::FOUR0);  // FOU
 #define stepsPerRevolutionEncoder 80
 #define stepperEncoderRatio stepsPerRevolutionStepper / stepsPerRevolutionEncoder
 
+// Status LED
+#define STATUS_LED PIN_PA2
+
 // Program variables
 int encoderPosition = 0;
+int lastEncoderPosition = 0;
+int encoderAdvance = 0;
 int stepperPosition = 0;
 
 void setup() {
@@ -38,6 +43,7 @@ void setup() {
   stepper.setMaxSpeed(1000);
 
   u8g2.begin();
+  Wire.setClock(400000);
 
   attachInterrupt(
     digitalPinToInterrupt(PIN_CLK), [] {
@@ -57,23 +63,44 @@ void setup() {
     u8g2.drawStr(0, 24, "Hello Stepper!");
   } while (u8g2.nextPage());
 
-  delay(5000);
+  pinMode(STATUS_LED, OUTPUT);
+  delay(1000);
 }
 
 void loop() {
-
-  u8g2.firstPage();
-
+  lastEncoderPosition = encoderPosition;
   encoderPosition = encoder.getPosition();
-  stepperPosition = encoderPosition * stepperEncoderRatio;
+  encoderAdvance = encoderPosition - lastEncoderPosition;
 
-  do {
-    u8g2.setFont(u8g2_font_luBIS08_tf);
-    u8g2.drawStr(0, 24, encoderPosition);
-    u8g2.drawStr(0, 48, stepperPosition);
-  } while (u8g2.nextPage());
-
-  // Move back to zero:
+  // stepperPosition += 1;
+  stepperPosition = stepperPosition + encoderAdvance * stepperEncoderRatio;
   stepper.moveTo(stepperPosition);
-  stepper.runToPosition();
+  stepper.setSpeed(1000);
+  stepper.runSpeedToPosition();
+
+
+  if (stepperPosition % 100 == 0) {
+    digitalWriteFast(STATUS_LED, !digitalRead(STATUS_LED));
+  }
+
+
+  // updateDisplay();
+}
+
+void updateDisplay() {
+  if (stepperPosition % 100 == 0) {  // This is slow, so don't do it too often
+    u8g2.firstPage();
+    do {
+      u8g2.setFont(u8g2_font_luBIS08_tf);
+      u8g2.drawStr(0, 24, "E");
+
+      u8g2.setCursor(24, 24);
+      u8g2.print(u8x8_u16toa(encoderPosition, 4));
+
+      u8g2.drawStr(0, 48, "S");
+      u8g2.setCursor(24, 48);
+      u8g2.print(u8x8_u16toa(stepperPosition, 4));
+      stepper.run();
+    } while (u8g2.nextPage());
+  }
 }
