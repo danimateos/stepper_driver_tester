@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include <U8g2lib.h>
+#include <U8x8lib.h>
 #include <ezButton.h>
 #include <AccelStepper.h>
 #include <RotaryEncoder.h>
@@ -16,8 +16,8 @@
 
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
-// Seed OLED display, driven through I2C
-U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
+// OLED display, driven through I2C
+U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(U8X8_PIN_NONE);
 
 // RotaryEncoder
 #define PIN_CLK PIN_PA4
@@ -44,7 +44,6 @@ void setup() {
 
   stepper.setMaxSpeed(1000);
 
-  u8g2.begin();
   Wire.setClock(400000);
 
   attachInterrupt(
@@ -58,13 +57,10 @@ void setup() {
     },
     CHANGE);
 
-  u8g2.firstPage();
-
-  do {
-    u8g2.setFont(u8g2_font_6x10_tf);
-
-    u8g2.drawStr(0, 24, "Hello Stepper!");
-  } while (u8g2.nextPage());
+  u8x8.begin();
+  u8x8.setFont(u8x8_font_chroma48medium8_r);
+  u8x8.setCursor(0, 24);
+  u8x8.print("Hello Stepper!");
 
   pinMode(STATUS_LED, OUTPUT);
   delay(1000);
@@ -89,26 +85,20 @@ void loop() {
 
   updateDisplay();
 
-  loops +=1;
+  loops += 1;
 }
 
 void updateDisplay() {
-    u8g2.firstPage();
-    do {
-      u8g2.setCursor(0, 12);
-      u8g2.print(loops);
-
-
-      u8g2.setCursor(90, 12);
-      u8g2.print(stepper.currentPosition());
-
-      u8g2.drawStr(0, 24, "E");
-
-      u8g2.setCursor(24, 24);
-      u8g2.print(encoderPosition);
-
-      u8g2.drawStr(66, 24, "S");
-      u8g2.setCursor(90, 24);
-      u8g2.print(stepperPosition);
-    } while (u8g2.nextPage());
+  if (loops % 10 == 0) {
+    u8x8.setCursor(0, 0);
+    u8x8.print(loops);
+    u8x8.setCursor(10, 0);
+    u8x8.print(stepper.currentPosition());
+    u8x8.setCursor(0, 1);
+    u8x8.print("E:");
+    u8x8.print(encoderPosition);
+    u8x8.setCursor(8, 1);
+    u8x8.print("S:");
+    u8x8.print(stepperPosition);
+  }
 }
