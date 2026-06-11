@@ -81,7 +81,7 @@ void loop() {
   stepper.runSpeedToPosition();
 
 
-  if (loops % 100000 == 0) {
+  if (loops % 10 == 0) {
     digitalWriteFast(STATUS_LED, !digitalRead(STATUS_LED));
   }
 
