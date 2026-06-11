@@ -10,8 +10,8 @@
 
 // NEMA 17 standard stepper with a Pololu A4988 driver or drop-in equivalent
 // Motor interface type must be set to 1 when using a driver https://www.makerguides.com/a4988-stepper-motor-driver-arduino-tutorial
-#define dirPin 8
-#define stepPin 3
+#define dirPin PIN_PA1
+#define stepPin PIN_PA7
 #define motorInterfaceType 1
 
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
@@ -22,6 +22,7 @@ U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 // RotaryEncoder
 #define PIN_CLK PIN_PA4
 #define PIN_DT PIN_PA5
+#define PIN_SW PIN_PA6
 
 RotaryEncoder encoder(PIN_CLK, PIN_DT, RotaryEncoder::LatchMode::FOUR0);  // FOUR0 — latch on every edge (higher resolution) -> 80 steps per rev
 
