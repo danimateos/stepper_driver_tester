@@ -33,10 +33,10 @@ RotaryEncoder encoder(PIN_CLK, PIN_DT, RotaryEncoder::LatchMode::FOUR0);  // FOU
 #define STATUS_LED PIN_PA2
 
 // Program variables
-int encoderPosition = 0;
-int lastEncoderPosition = 0;
-int encoderAdvance = 0;
-int stepperPosition = 0;
+long encoderPosition = 0;
+long lastEncoderPosition = 0;
+long encoderAdvance = 0;
+long stepperPosition = 0;
 
 void setup() {
 
