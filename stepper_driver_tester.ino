@@ -10,7 +10,7 @@
 
 // NEMA 17 standard stepper with a Pololu A4988 driver or drop-in equivalent
 // Motor interface type must be set to 1 when using a driver https://www.makerguides.com/a4988-stepper-motor-driver-arduino-tutorial
-#define dirPin 2
+#define dirPin 8
 #define stepPin 3
 #define motorInterfaceType 1
 
