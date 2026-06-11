@@ -17,7 +17,7 @@
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
 // Seed OLED display, driven through I2C
-U8G2_SH1107_SEEED_128X128_1_HW_I2C u8g2(U8G2_R0, /* clock=*/SCL, /* data=*/SDA, /* reset=*/U8X8_PIN_NONE);
+U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 
 // RotaryEncoder
 #define PIN_CLK PIN_PA4
@@ -84,23 +84,22 @@ void loop() {
   }
 
 
-  // updateDisplay();
+  updateDisplay();
 }
 
 void updateDisplay() {
-  if (stepperPosition % 100 == 0) {  // This is slow, so don't do it too often
+  // if (stepperPosition % 100 == 0) {  // This is slow, so don't do it too often
     u8g2.firstPage();
     do {
-      u8g2.setFont(u8g2_font_luBIS08_tf);
       u8g2.drawStr(0, 24, "E");
 
       u8g2.setCursor(24, 24);
       u8g2.print(u8x8_u16toa(encoderPosition, 4));
 
-      u8g2.drawStr(0, 48, "S");
-      u8g2.setCursor(24, 48);
+      u8g2.drawStr(66, 24, "S");
+      u8g2.setCursor(90, 24);
       u8g2.print(u8x8_u16toa(stepperPosition, 4));
       stepper.run();
     } while (u8g2.nextPage());
-  }
+  // }
 }
