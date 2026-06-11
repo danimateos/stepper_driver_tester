@@ -59,7 +59,8 @@ void setup() {
   u8g2.firstPage();
 
   do {
-    u8g2.setFont(u8g2_font_luBIS08_tf);
+    u8g2.setFont(u8g2_font_6x10_tf);
+
     u8g2.drawStr(0, 24, "Hello Stepper!");
   } while (u8g2.nextPage());
 
@@ -88,18 +89,16 @@ void loop() {
 }
 
 void updateDisplay() {
-  // if (stepperPosition % 100 == 0) {  // This is slow, so don't do it too often
     u8g2.firstPage();
     do {
       u8g2.drawStr(0, 24, "E");
 
       u8g2.setCursor(24, 24);
-      u8g2.print(u8x8_u16toa(encoderPosition, 4));
+      u8g2.print(encoderPosition);
 
       u8g2.drawStr(66, 24, "S");
       u8g2.setCursor(90, 24);
-      u8g2.print(u8x8_u16toa(stepperPosition, 4));
+      u8g2.print(stepperPosition);
       stepper.run();
     } while (u8g2.nextPage());
-  // }
 }
