@@ -37,6 +37,7 @@ long encoderPosition = 0;
 long lastEncoderPosition = 0;
 long encoderAdvance = 0;
 long stepperPosition = 0;
+long loops = 0;
 
 void setup() {
 
@@ -80,17 +81,26 @@ void loop() {
   stepper.runSpeedToPosition();
 
 
-  if (stepperPosition % 100 == 0) {
+  if (loops % 100000 == 0) {
     digitalWriteFast(STATUS_LED, !digitalRead(STATUS_LED));
   }
 
 
   updateDisplay();
+
+  loops +=1;
 }
 
 void updateDisplay() {
     u8g2.firstPage();
     do {
+      u8g2.setCursor(0, 12);
+      u8g2.print(loops);
+
+
+      u8g2.setCursor(90, 12);
+      u8g2.print(stepper.currentPosition());
+
       u8g2.drawStr(0, 24, "E");
 
       u8g2.setCursor(24, 24);
@@ -99,6 +109,5 @@ void updateDisplay() {
       u8g2.drawStr(66, 24, "S");
       u8g2.setCursor(90, 24);
       u8g2.print(stepperPosition);
-      stepper.run();
     } while (u8g2.nextPage());
 }
