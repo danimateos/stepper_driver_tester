@@ -28,6 +28,8 @@ RotaryEncoder encoder(PIN_CLK, PIN_DT, RotaryEncoder::LatchMode::FOUR0);  // FOU
 ezButton button(PIN_SW);
 
 #define DOUBLE_CLICK_MILLIS 300
+#define N_MULTIPLIERS 10
+const int MULTIPLIERS[N_MULTIPLIERS] = { 0, 1, 2, 4, 8, 16, 32, 64, 128, 256 };
 #define stepsPerRevolutionStepper 200
 #define stepsPerRevolutionEncoder 80
 #define stepperEncoderRatio stepsPerRevolutionStepper / stepsPerRevolutionEncoder
@@ -47,7 +49,7 @@ enum ControlMode { POSITION,
                    SPEED };
 ControlMode controlMode = POSITION;
 long timeButtonPressed = 0;
-
+int currentMultiplier = 0;
 
 void setup() {
 
@@ -106,8 +108,10 @@ void checkEncoderClick() {
     if ((now - timeButtonPressed) < DOUBLE_CLICK_MILLIS) {
       // Double click: switch control mode
       controlMode = (controlMode + 1) % 2;
+      currentMultiplier = 0;
     } else {
       // Single click: change speed / rotation multiplier
+      currentMultiplier = (currentMultiplier + 1) % N_MULTIPLIERS;
       digitalWriteFast(STATUS_LED, !digitalRead(STATUS_LED));
     }
 
@@ -129,11 +133,14 @@ void updateDisplay() {
     u8x8.print("S:");
     u8x8.print(stepperPosition);
 
-    u8x8.setCursor(8, 2);
+    u8x8.setCursor(0, 2);
     if (controlMode == POSITION) {
       u8x8.print("POSITION");
     } else if (controlMode == SPEED) {
       u8x8.print("SPEED");
     }
+    u8x8.setCursor(10, 2);
+    u8x8.print("x");
+    u8x8.print(MULTIPLIERS[currentMultiplier]);
   }
 }
