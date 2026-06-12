@@ -17,6 +17,9 @@
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
 // OLED display, driven through I2C
+#define CLEAR_TIME 2500
+#define REFRESH_TIME 50
+
 U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(U8X8_PIN_NONE);
 
 // RotaryEncoder
@@ -43,6 +46,9 @@ long lastEncoderPosition = 0;
 long encoderAdvance = 0;
 long stepperPosition = 0;
 long loops = 0;
+long timeDisplayRefreshed = 0;
+long timeDisplayCleared = 0;
+
 
 // State machine
 enum ControlMode { POSITION,
@@ -67,6 +73,8 @@ void setup() {
       encoder.tick();
     },
     CHANGE);
+
+    button.setDebounceTime(20);
 
   u8x8.begin();
   u8x8.setFont(u8x8_font_chroma48medium8_r);
@@ -112,7 +120,6 @@ void checkEncoderClick() {
     } else {
       // Single click: change speed / rotation multiplier
       currentMultiplier = (currentMultiplier + 1) % N_MULTIPLIERS;
-      digitalWriteFast(STATUS_LED, !digitalRead(STATUS_LED));
     }
 
     timeButtonPressed = now;
@@ -120,8 +127,14 @@ void checkEncoderClick() {
 }
 
 void updateDisplay() {
-  if (loops % 10 == 0) {
+  long now = millis();
+
+  if ((now - timeDisplayCleared) > CLEAR_TIME) {
     u8x8.clearDisplay();
+    timeDisplayCleared = now;
+  }
+
+  if ((now - timeDisplayRefreshed) > REFRESH_TIME) {
     u8x8.setCursor(0, 0);
     u8x8.print(loops);
     u8x8.setCursor(10, 0);
@@ -142,5 +155,7 @@ void updateDisplay() {
     u8x8.setCursor(10, 2);
     u8x8.print("x");
     u8x8.print(MULTIPLIERS[currentMultiplier]);
+
+    timeDisplayRefreshed = now;
   }
 }
