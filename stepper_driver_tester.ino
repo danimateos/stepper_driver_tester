@@ -27,6 +27,7 @@ U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(U8X8_PIN_NONE);
 RotaryEncoder encoder(PIN_CLK, PIN_DT, RotaryEncoder::LatchMode::FOUR0);  // FOUR0 — latch on every edge (higher resolution) -> 80 steps per rev
 ezButton button(PIN_SW);
 
+#define DOUBLE_CLICK_MILLIS 300
 #define stepsPerRevolutionStepper 200
 #define stepsPerRevolutionEncoder 80
 #define stepperEncoderRatio stepsPerRevolutionStepper / stepsPerRevolutionEncoder
@@ -45,7 +46,7 @@ long loops = 0;
 enum ControlMode { POSITION,
                    SPEED };
 ControlMode controlMode = POSITION;
-bool pressedOnce = false;
+long timeButtonPressed = 0;
 
 
 void setup() {
@@ -101,9 +102,16 @@ void loop() {
 void checkEncoderClick() {
   button.loop();
   if (button.isPressed()) {
-    digitalWriteFast(STATUS_LED, HIGH);
-  } else {
-    digitalWriteFast(STATUS_LED, LOW);
+    long now = millis();
+    if ((now - timeButtonPressed) < DOUBLE_CLICK_MILLIS) {
+      // Double click: switch control mode
+      controlMode = (controlMode + 1) % 2;
+    } else {
+      // Single click: change speed / rotation multiplier
+      digitalWriteFast(STATUS_LED, !digitalRead(STATUS_LED));
+    }
+
+    timeButtonPressed = now;
   }
 }
 
@@ -122,7 +130,7 @@ void updateDisplay() {
     u8x8.print(stepperPosition);
 
     u8x8.setCursor(8, 2);
-    if (controlMode == POSITION ) {
+    if (controlMode == POSITION) {
       u8x8.print("POSITION");
     } else if (controlMode == SPEED) {
       u8x8.print("SPEED");
